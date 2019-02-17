@@ -2,23 +2,31 @@ pipeline {
     agent any
 
     stages {
-        stage ('Clone') {
+        stage ('Compile Stage') {
+
             steps {
-                git branch: 'master', url: "https://github.com/Jayaram666/sample-project.git"
+                withMaven(maven : 'M2_HOME') {
+                    sh 'mvn clean compile'
+                }
             }
         }
-        stage('Build') {
-        withMaven(maven: 'M2_HOME') {
-        dir('SpringBootRestApiExample') {
-        bt 'mvn clean package'
-      }
+
+        stage ('Testing Stage') {
+
+            steps {
+                withMaven(maven : 'maven_3_5_0') {
+                    sh 'mvn test'
+                }
+            }
+        }
+
+
+        stage ('Deployment Stage') {
+            steps {
+                withMaven(maven : 'maven_3_5_0') {
+                    sh 'mvn deploy'
+                }
+            }
+        }
     }
-  }
-  stage('Archive') {
-         steps {
-           dir ('SpringBootRestApiExample/target') {
-           archive '*.jar'
-         }  
-      } 
-   } 
-   }
+}
